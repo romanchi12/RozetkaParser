@@ -1,13 +1,15 @@
-package org.romanchi;
+package org.romanchi.google;
 
 public class GoogleResultItem {
-    String title;
-    String  link;
-    String describe;
-    GoogleResultItem(String title, String link, String describe){
+    private String title;
+    private String  link;
+    private String describe;
+    int page;
+    GoogleResultItem(String title, String link, String describe, int page){
         this.title = title;
         this.link = link;
         this.describe = describe;
+        this.page = page;
     }
     public boolean hasKeyword(String keyword){
         if(title.toLowerCase().contains(keyword.toLowerCase())
@@ -39,6 +41,14 @@ public class GoogleResultItem {
 
     public void setDescribe(String describe) {
         this.describe = describe;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
     }
 
     @Override
@@ -73,6 +83,7 @@ public class GoogleResultItem {
                 "title='" + title + '\'' +
                 ", link='" + link + '\'' +
                 ", describe='" + describe + '\'' +
+                ", page=" + page +
                 '}';
     }
 }

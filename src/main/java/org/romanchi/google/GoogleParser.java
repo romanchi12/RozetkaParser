@@ -1,12 +1,10 @@
-package org.romanchi;
+package org.romanchi.google;
 
-import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.Screenshot;
-import ru.yandex.qatools.ashot.coordinates.Coords;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 
 import javax.imageio.ImageIO;
@@ -40,6 +38,7 @@ public class GoogleParser implements Closeable {
     }
     public void find(String query){
         WebElement qElement = driver.findElement(By.name("q"));
+        qElement.clear();
         qElement.sendKeys(query);
         qElement.submit();
         try {
@@ -48,7 +47,7 @@ public class GoogleParser implements Closeable {
             e.printStackTrace();
         }
     }
-    public void find(String query, String keyword){
+    public GoogleResultItem find(String query, String keyword){
         find(query);
         while(true){
             System.out.println("Page: " + getCurrentPage());
@@ -58,11 +57,11 @@ public class GoogleParser implements Closeable {
                     Screenshot myScreenshot = new AShot().shootingStrategy(ShootingStrategies.viewportPasting(10)).takeScreenshot(driver);
                     try {
                         ImageIO.write(myScreenshot.getImage(),
-                                "PNG",new File(keyword+"_" + getCurrentPage() + ".png"));
+                                "PNG",new File(keyword+"_" + googleResultItem.getPage() + ".png"));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    return;
+                    return googleResultItem;
                 }
             }
             goToNextPage();
@@ -77,7 +76,7 @@ public class GoogleParser implements Closeable {
         List<WebElement> results = driver.findElements(By.className("g"));
         System.out.println(results.size());
         List<GoogleResultItem> toReturn = new ArrayList<>(results.size());
-
+        int currentPage = getCurrentPage();
         for (WebElement result : results) {
             try{
                 WebElement r = result.findElement(By.className("r"));
@@ -85,10 +84,10 @@ public class GoogleParser implements Closeable {
                 String link = r.findElement(By.tagName("cite")).getText();
                 WebElement s = result.findElement(By.className("s"));
                 String describe = s.findElement(By.className("st")).getText();
-                GoogleResultItem googleResultItem = new GoogleResultItem(title, link, describe);
+                GoogleResultItem googleResultItem =
+                        new GoogleResultItem(title, link, describe, getCurrentPage());
                 toReturn.add(googleResultItem);
             }catch (org.openqa.selenium.NoSuchElementException ex){
-                //System.out.println(ex.getMessage());
             }
         }
 

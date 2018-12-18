@@ -1,31 +1,35 @@
 package org.romanchi;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import java.net.URL;
-import java.util.List;
+import org.romanchi.google.GoogleParser;
+import org.romanchi.google.GoogleResultItem;
+import org.romanchi.rozetka.RozetkaGoodTile;
+import org.romanchi.rozetka.RozetkaParser;
+import org.romanchi.rozetka.RozetkaPriceFilter;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-
+        //Task 1,2
         try(GoogleParser googleParser = new GoogleParser()){
-            /*googleParser.find("євровікна");
-            googleParser.goToNextPage();
-            List<GoogleResultItem> googleResultItems = googleParser.getResults();
-            for (GoogleResultItem googleResultItem:googleResultItems) {
-                System.out.println(googleResultItem);
-            }*/
-            googleParser.find("євровікна", "львів");
+            GoogleResultItem googleResultItem = googleParser.find("євровікна", "львів");
+            System.out.println("RESULT: " + googleResultItem);
+
+            GoogleResultItem googleResultItem2 = googleParser.find("євровікна","Grandi");
+            System.out.println("RESULT: " + googleResultItem2);
+
         }
-
-
-
-
+        //Task 3
+        try(RozetkaParser rozetkaParser = new RozetkaParser()){
+            int minPrice = 20000;
+            RozetkaPriceFilter priceFilter = rozetkaParser.getPriceFilter();
+            priceFilter.setMinPrice(minPrice);
+            priceFilter.submit();
+            RozetkaGoodTile toCompare = new RozetkaGoodTile("MinPricedGood", minPrice);
+            for(RozetkaGoodTile tile:rozetkaParser.getFirstSetGoods()){
+                if(tile.compareTo(toCompare) < 0){
+                    throw new Exception("Bad filter");
+                }
+            }
+            System.out.println("Filter is ok");
+        }
     }
 }
